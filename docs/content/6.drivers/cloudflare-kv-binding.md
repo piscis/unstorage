@@ -25,6 +25,11 @@ const storage = createStorage({
   driver: cloudflareKVBindingDriver({ binding: this.env.STORAGE }),
 });
 
+// Using binding name to be picked from globalThis and configure TTL to expire items in 60 seconds
+const storage = createStorage({
+  driver: cloudflareKVBindingDriver({ binding: "STORAGE", {ttl: { expirationTtl: 60 } }),
+});
+
 // Using outside of Cloudflare Workers (like Node.js)
 // Use cloudflare-kv-http
 ```
@@ -33,3 +38,12 @@ const storage = createStorage({
 
 - `binding`: KV binding or name of namespace. Default is `STORAGE`.
 - `base`: Adds prefix to all stored keys
+- `ttl`: Configures global TTL settings
+  - `expiration`: TTL for item since epoch
+  - `expirationTtl`: TTL for all items in seconds
+
+**Transaction options:**
+
+- ttl: Supported for setItem(key, value, { ttl: number /* seconds */ })
+- `expiration`: TTL for item since epoch. Example: `setItem(key, value, { expiration: number /* seconds since epoch */ })`
+- `expirationTtl`: TTL for all items in seconds. Example: `setItem(key, value, { expirationTtl: number /* TTL in seconds | min value 60 */ })`
