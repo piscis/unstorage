@@ -5,6 +5,9 @@ export interface KVOptions {
 
   /** Adds prefix to all stored keys */
   base?: string;
+
+  /** Default TTL config for all stored keys */
+  ttl?: FetcherPutOptions
 }
 
 // https://developers.cloudflare.com/workers/runtime-apis/kv
@@ -34,10 +37,16 @@ export default defineDriver((opts: KVOptions = {}) => {
       const binding = getBinding(opts.binding);
       return binding.get(key);
     },
-    setItem(key, value) {
+    setItem(key, value, tOptions?: FetcherPutOptions) {
       key = r(key);
       const binding = getBinding(opts.binding);
-      return binding.put(key, value);
+      let ttl = tOptions ?? opts.ttl;
+
+      if (ttl) {
+        return binding.put(key, value, ttl);
+      } else {
+        return binding.put(key, value);
+      }
     },
     removeItem(key) {
       key = r(key);
